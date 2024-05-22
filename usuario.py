@@ -24,7 +24,6 @@ while True:
         cidade = input("digite a cidade: ")
         estado = input("digite a UF do estado: ")
         
-        
         #endereco = [logradouro, numero, bairro, cidade, estado]
         #usuario = dict(cpf = cpf, nome = nome, nascimento= nascimento)
         #depositorio = [logradouro, numero, bairro, cidade, estado]
