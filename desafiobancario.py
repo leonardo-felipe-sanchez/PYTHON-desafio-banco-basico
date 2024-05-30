@@ -1,4 +1,3 @@
-
 from abc import ABC, abstractmethod, abstractproperty
 import re,datetime
 
@@ -52,6 +51,15 @@ class PessoaFisica(Cliente):
         self._endereco = endereco
         self._contas = contas
 
+def log_decorator(func):
+    def wrapper(*args, **kwargs):
+        now = datetime.datetime.now()
+        print(f"Data e hora da transação: {now}")
+        print(f"Tipo da transação: {func.__name__}")
+        result = func(*args, **kwargs)
+        print("-------------------------")
+        return result
+    return wrapper
 
 class Conta:
     def __init__(self, saldo, numero = 0, cliente = 0, agencia = 1, historico = Historico()):
@@ -64,19 +72,15 @@ class Conta:
     def Saldo(self, saldo):
         self._saldo = saldo
 
+    @log_decorator
     def nova_conta(self, cliente, numero):
         self._cliente = PessoaFisica(cliente[0], cliente[1], cliente[2], cliente[3])
         self._numero += numero
     
     def sacar(self, valor):
         saldo = -int(valor) + int(self._saldo)
-        if int(valor) <1:
-            return False
-        elif int(valor) > self._saldo:
-            return False 
-        else:
-            self.Saldo(saldo)
-            return True
+        self.Saldo(saldo)
+        return True
     
     def depositar(self, valor):
         saldo = int(self._saldo) + int(valor)
@@ -93,6 +97,51 @@ class ContaCorrente(Conta):
         self._limite = limite
         self._limite_saques = limite_saques
 
+#class Deposito(Transacao):
+#    def __init__(self, valor = 0):
+#        self._valor = valor 
+
+#    def Registrar(self, conta):
+        #for contas in conta[0]:
+           # print(contas)
+        # Corrected usage of PessoaFisica
+          # Assuming 'conta' contains the user object
+#        conta[0][conta[1]]._contas[conta[2]]._historico.adicinar_transacao(f"{conta[0][conta[1]]._contas[conta[2]]._cliente}, {conta[0][conta[1]]._cpf}, {conta[4]} + {conta[3]} = {conta[0][conta[1]]._contas[conta[2]]._saldo}")
+
+#class Saque(Transacao):
+#    def __init__(self, valor = 0):
+#        self._valor = valor
+
+#    def Registrar(self, conta):
+#        #conta.sacar(self._valor) # Perform the deposit
+#        conta[0][conta[1]]._contas[conta[2]]._historico.adicinar_transacao(f"{conta[0][conta[1]]._contas[conta[2]]._cliente}, {conta[0][conta[1]]._cpf}, {conta[4]} - {conta[3]} = {conta[0][conta[1]]._contas[conta[2]]._saldo}")
+
+        
+def formatarData(data_nascimento):
+    if re.findall(r"[^a-zA-Z0-9\s]", data_nascimento) or re.findall(r'[^\S\n\t]+',data_nascimento):
+        if data_nascimento.find(" "):
+            data_nascimento = data_nascimento.replace(" ", "-")
+        data_nascimento = re.split(r"[^a-zA-Z0-9\s]", data_nascimento)
+    else:
+        result = ''
+        for index, character in enumerate(data_nascimento): 
+            if index == 1 or index == 3:
+                result = result + character + ' '
+            else:
+                result = result + character
+        data_nascimento = result.split()
+    return datetime.datetime(int(data_nascimento[2]), int(data_nascimento[1]), int(data_nascimento[0]))
+
+def verificar_cpf(classeLista, cpf):
+    resultado =  "usuario novo"
+    for index, classes in enumerate(classeLista, 0):
+        if int(cpf) == int(classes._cpf):
+             resultado = index
+
+    return resultado
+
+# Modify the Deposito class to use the decorator
+@log_decorator
 class Deposito(Transacao):
     def __init__(self, valor = 0):
         self._valor = valor 
@@ -102,14 +151,18 @@ class Deposito(Transacao):
            # print(contas)
         # Corrected usage of PessoaFisica
           # Assuming 'conta' contains the user object
+        conta[0][conta[1]]._contas[conta[2]].depositar(conta[3])
         conta[0][conta[1]]._contas[conta[2]]._historico.adicinar_transacao(f"{conta[0][conta[1]]._contas[conta[2]]._cliente}, {conta[0][conta[1]]._cpf}, {conta[4]} + {conta[3]} = {conta[0][conta[1]]._contas[conta[2]]._saldo}")
 
+# Modify the Saque class to use the decorator
+@log_decorator
 class Saque(Transacao):
     def __init__(self, valor = 0):
         self._valor = valor
 
     def Registrar(self, conta):
         #conta.sacar(self._valor) # Perform the deposit
+        conta[0][conta[1]]._contas[conta[2]].sacar(conta[3])
         conta[0][conta[1]]._contas[conta[2]]._historico.adicinar_transacao(f"{conta[0][conta[1]]._contas[conta[2]]._cliente}, {conta[0][conta[1]]._cpf}, {conta[4]} - {conta[3]} = {conta[0][conta[1]]._contas[conta[2]]._saldo}")
 
         
@@ -234,20 +287,23 @@ while True:
                             if int(classeLista[index]._contas[numero_acesso_conta]._limite) != int(classeLista[index]._contas[numero_acesso_conta]._limite_saques):
                                 dinheiro = int(input("digite o valor a ser sacado: "))
                                 saldo = classeLista[index]._contas[numero_acesso_conta]._saldo
-                                if classeLista[index]._contas[numero_acesso_conta].sacar(dinheiro) == True:
+                                #if classeLista[index]._contas[numero_acesso_conta].sacar(dinheiro) == True:
+                                if dinheiro <0:
+                                    print("valor invalido")
+                                elif dinheiro > saldo:
+                                    print("saque maior que saldo")
+                                else:
                                     classeLista[index]._contas[numero_acesso_conta]._limite += 1
                                     saque = Saque(dinheiro)
                                     classeLista[index].realizar_transacao(saque, [classeLista, index, numero_acesso_conta, dinheiro, saldo])
                                     print("saque realizado com sucesso")
-                                else:
-                                    print("valor invalido ou saque maior que saldo")
                             else:
                                 print("limite de saque atingido")
                                 
                         elif escolha == 2:
                             dinheiro = int(input("digite o valor a ser depositado: "))
                             saldo = classeLista[index]._contas[numero_acesso_conta]._saldo
-                            if classeLista[index]._contas[numero_acesso_conta].depositar(dinheiro) == True:
+                            if dinheiro > 0:
                             # Create a Deposito instance with the necessary data
                                 deposito = Deposito(dinheiro)
                                 classeLista[index].realizar_transacao(deposito, [classeLista, index, numero_acesso_conta, dinheiro, saldo])
