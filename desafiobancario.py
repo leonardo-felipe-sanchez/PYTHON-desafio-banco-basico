@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod, abstractproperty
+from pathlib import Path
 import re,datetime
 
 class Transacao(ABC):
@@ -54,10 +55,16 @@ class PessoaFisica(Cliente):
 def log_decorator(func):
     def wrapper(*args, **kwargs):
         now = datetime.datetime.now()
-        print(f"Data e hora da transação: {now}")
-        print(f"Tipo da transação: {func.__name__}")
+        #print(f"Data e hora da transação: {now}")
+        #print(f"Tipo da transação: {func.__name__}")
+        with open(log_file, "a", encoding="utf-8") as arquivo:
+            arquivo.writelines(f"Data e hora da transação: {now} ")
+            arquivo.writelines(f"Tipo da transação: {func.__name__} \n")
+            arquivo.close()
+
         result = func(*args, **kwargs)
-        print("-------------------------")
+        #print("-------------------------")
+        #print(log_file)
         return result
     return wrapper
 
@@ -206,6 +213,8 @@ digite 4 para sair
 )
 opcao, escolha, looping, laco, index, index2, numero_conta = (0, 0, True, True, -1, 0, 0)
 classeLista = []
+ROOT_PATH = Path(__file__).parent 
+log_file = ROOT_PATH / 'registro.log'
 while True:
     opcao = int(input(menu2))
     if opcao == 1:
