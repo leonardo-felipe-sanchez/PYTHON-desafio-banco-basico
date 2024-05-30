@@ -92,7 +92,7 @@ class Conta:
 
 class ContaCorrente(Conta):
 
-    def __init__(self, saldo, numero=0, cliente=0, agencia=1, historico=Historico(), limite = 0, limite_saques = 3):
+    def __init__(self, saldo, numero=0, cliente=0, agencia=1, historico=Historico(), limite = 0, limite_saques = 10):
         super().__init__(saldo, numero, cliente, agencia, historico)
         self._limite = limite
         self._limite_saques = limite_saques
@@ -152,7 +152,7 @@ class Deposito(Transacao):
         # Corrected usage of PessoaFisica
           # Assuming 'conta' contains the user object
         conta[0][conta[1]]._contas[conta[2]].depositar(conta[3])
-        conta[0][conta[1]]._contas[conta[2]]._historico.adicinar_transacao(f"{conta[0][conta[1]]._contas[conta[2]]._cliente}, {conta[0][conta[1]]._cpf}, {conta[4]} + {conta[3]} = {conta[0][conta[1]]._contas[conta[2]]._saldo}")
+        conta[0][conta[1]]._contas[conta[2]]._historico.adicinar_transacao(f"{conta[0][conta[1]]._contas[conta[2]]._cliente}, {conta[0][conta[1]]._cpf}, {conta[4]} + {conta[3]} = {conta[0][conta[1]]._contas[conta[2]]._saldo}, {datetime.datetime.now()}")
 
 # Modify the Saque class to use the decorator
 @log_decorator
@@ -163,7 +163,7 @@ class Saque(Transacao):
     def Registrar(self, conta):
         #conta.sacar(self._valor) # Perform the deposit
         conta[0][conta[1]]._contas[conta[2]].sacar(conta[3])
-        conta[0][conta[1]]._contas[conta[2]]._historico.adicinar_transacao(f"{conta[0][conta[1]]._contas[conta[2]]._cliente}, {conta[0][conta[1]]._cpf}, {conta[4]} - {conta[3]} = {conta[0][conta[1]]._contas[conta[2]]._saldo}")
+        conta[0][conta[1]]._contas[conta[2]]._historico.adicinar_transacao(f"{conta[0][conta[1]]._contas[conta[2]]._cliente}, {conta[0][conta[1]]._cpf}, {conta[4]} - {conta[3]} = {conta[0][conta[1]]._contas[conta[2]]._saldo}, {datetime.datetime.now()}")
 
         
 def formatarData(data_nascimento):
@@ -316,7 +316,7 @@ while True:
                             
                             for historicidade in split_list:
                                 if str(historicidade[0]) == str(classeLista[index]._contas[numero_acesso_conta]._cliente):
-                                    print(historicidade[2])
+                                    print(f"{historicidade[3]} - {historicidade[2]}")
                         elif escolha == 4:
                             laco = False
                             break
